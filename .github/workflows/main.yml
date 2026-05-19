@@ -11,27 +11,24 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@v4
       
-      - name: 解压项目压缩包并查看文件
-        run: |
-          unzip ing.zip
-          ls -la
+      - name: 解压项目压缩包
+        run: unzip ing.zip
       
       - name: 安装Node.js 18
         uses: actions/setup-node@v4
         with:
           node-version: 18
       
-      - name: 安装项目依赖（完全不使用锁文件）
+      - name: 安装项目依赖和EAS CLI
         run: |
           cd ing
-          npm install --no-package-lock --force
+          npm install --force
+          npm install -g eas-cli
       
-      - name: 配置Expo环境
-        uses: expo/expo-github-action@v8
-        with:
-          expo-version: latest
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
+      - name: 登录Expo
+        run: |
+          cd ing
+          eas login --token ${{ secrets.EXPO_TOKEN }}
       
       - name: 生成安卓APK
         run: |
