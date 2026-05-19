@@ -2,7 +2,7 @@ name: 自动打包安卓APK
 on:
   push:
     branches: [ main ]
-  workflow_dispatch: # 允许手动触发打包
+  workflow_dispatch:
 
 jobs:
   build:
@@ -12,16 +12,19 @@ jobs:
         uses: actions/checkout@v4
       
       - name: 解压项目压缩包
-        run: unzip ing.zip -d .
+        run: |
+          unzip ing.zip -d temp
+          mv temp/* .
+          rm -rf temp ing.zip
       
-      - name: 安装Node.js 20
+      - name: 安装Node.js 18（稳定版）
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm' # 缓存依赖，第二次打包快10倍
+          node-version: 18
+          cache: 'npm'
       
       - name: 安装项目依赖
-        run: npm ci
+        run: npm install --force
       
       - name: 配置Expo环境
         uses: expo/expo-github-action@v8
@@ -38,4 +41,4 @@ jobs:
         with:
           name: ing-陪伴-安卓安装包
           path: ing-release.apk
-          retention-days: 90 # APK保留90天
+          retention-days: 90
