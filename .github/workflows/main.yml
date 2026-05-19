@@ -11,20 +11,20 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@v4
       
-      - name: 解压项目压缩包
+      - name: 解压项目压缩包并查看文件
         run: |
-          unzip ing.zip -d temp
-          mv temp/* .
-          rm -rf temp ing.zip
+          unzip ing.zip
+          ls -la
       
-      - name: 安装Node.js 18（稳定版）
+      - name: 安装Node.js 18
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
       
-      - name: 安装项目依赖
-        run: npm install --force
+      - name: 安装项目依赖（完全不使用锁文件）
+        run: |
+          cd ing
+          npm install --no-package-lock --force
       
       - name: 配置Expo环境
         uses: expo/expo-github-action@v8
@@ -34,7 +34,9 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
       
       - name: 生成安卓APK
-        run: eas build --platform android --profile preview --local --output ing-release.apk
+        run: |
+          cd ing
+          eas build --platform android --profile preview --local --output ../ing-release.apk
       
       - name: 上传生成的APK
         uses: actions/upload-artifact@v4
