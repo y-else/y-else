@@ -1,4 +1,4 @@
-name: 自动打包安卓APK
+name: 纯Gradle安卓打包
 on:
   push:
     branches: [ main ]
@@ -19,22 +19,30 @@ jobs:
         with:
           node-version: 18
       
-      - name: 安装项目依赖和EAS CLI
+      - name: 安装项目依赖
         run: |
           cd ing
           npm install --force
-          npm install -g eas-cli
       
-      - name: 设置Expo环境变量并打包
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      - name: 生成原生Android项目
         run: |
           cd ing
-          eas build --platform android --profile preview --local --output ../ing-release.apk
+          npx expo prebuild --platform android --clean
+      
+      - name: 设置JDK环境
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      
+      - name: 运行Gradle打包APK
+        run: |
+          cd ing/android
+          ./gradlew assembleRelease
       
       - name: 上传生成的APK
         uses: actions/upload-artifact@v4
         with:
           name: ing-陪伴-安卓安装包
-          path: ing-release.apk
+          path: ing/android/app/build/outputs/apk/release/app-release.apk
           retention-days: 90
