@@ -25,12 +25,9 @@ jobs:
           npm install --force
           npm install -g eas-cli
       
-      - name: 登录Expo
-        run: |
-          cd ing
-          eas login --token ${{ secrets.EXPO_TOKEN }}
-      
-      - name: 生成安卓APK
+      - name: 设置Expo环境变量并打包
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           cd ing
           eas build --platform android --profile preview --local --output ../ing-release.apk
