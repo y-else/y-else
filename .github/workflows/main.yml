@@ -1,0 +1,41 @@
+name: 自动打包安卓APK
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # 允许手动触发打包
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 解压项目压缩包
+        run: unzip ing.zip -d .
+      
+      - name: 安装Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm' # 缓存依赖，第二次打包快10倍
+      
+      - name: 安装项目依赖
+        run: npm ci
+      
+      - name: 配置Expo环境
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      
+      - name: 生成安卓APK
+        run: eas build --platform android --profile preview --local --output ing-release.apk
+      
+      - name: 上传生成的APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ing-陪伴-安卓安装包
+          path: ing-release.apk
+          retention-days: 90 # APK保留90天
